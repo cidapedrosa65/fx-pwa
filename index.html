@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fake-X</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#007BFF">
+  <link rel="icon" href="/icons/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+  <style>
+    :root {
+      --primary: #007BFF;
+      --primary-dark: #0056b3;
+      --bg-light: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+      --bg-dark: #121212;
+      --text-light: #333;
+      --text-dark: #f1f1f1;
+      --max-width: 450px;
+      --radius: 5px;
+      --gap: 10px;
+      --transition: 0.3s;
+    }
+
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--bg-light);
+      color: var(--text-light);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+      transition: background var(--transition), color var(--transition);
+    }
+
+    body.night-mode {
+      background: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      font-size: 2rem;
+    }
+
+    #toolbar {
+      margin-bottom: 20px;
+      display: flex;
+      gap: var(--gap);
+    }
+
+    #toolbar button {
+      padding: 8px 12px;
+      font-size: 1rem;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background-color var(--transition);
+    }
+
+    #toolbar button:hover {
+      background: var(--primary-dark);
+    }
+
+    #userSelect {
+      margin-bottom: 20px;
+      font-size: 1rem;
+      padding: 6px 10px;
+      border-radius: var(--radius);
+    }
+
+    #tweetContainer {
+      width: 100%;
+      max-width: var(--max-width);
+      background: #fff;
+      border-radius: 30px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, .1);
+      padding: 10px;
+      overflow: hidden;
+      transition: height var(--transition);
+      margin-bottom: 20px;
+    }
+
+    #tweetHeader {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+      font-family: "Helvetica Neue", sans-serif;
+    }
+
+    #tweetHeader img {
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #ddd;
+    }
+
+    #tweetHeader h1 {
+      font-size: 26px;
+    }
+
+    #tweetHeader p {
+      font-size: 15px;
+    }
+
+    #tweetText {
+      font-family: "Segoe UI", sans-serif;
+      font-size: 20px;
+      line-height: 1.4;
+      padding: 10px;
+      border: 1px dashed transparent;
+      transition: border-color var(--transition);
+      min-height: 60px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    #tweetText:focus {
+      border-color: #aaa;
+    }
+
+    #tweetText:empty::before {
+      content: attr(placeholder);
+      color: #bbb;
+    }
+
+    #charCount {
+      margin-bottom: var(--gap);
+      font-size: .9rem;
+      color: #555;
+    }
+
+    #optionsContainer {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    #fontSizeSelect {
+      padding: 5px 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: var(--radius);
+      background: #fff;
+    }
+
+    #downloadBtn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: var(--radius);
+      background: var(--primary);
+      color: #fff;
+      cursor: pointer;
+      transition: background var(--transition);
+      display: none;
+    }
+
+    #downloadBtn:hover {
+      background: var(--primary-dark);
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 20px;
+      }
+
+      #tweetContainer {
+        max-width: 100%;
+      }
+
+      #tweetHeader h1 {
+        font-size: 22px;
+      }
+
+      #tweetHeader p {
+        font-size: 13px;
+      }
+
+      #tweetText {
+        font-size: 18px;
+        padding: 8px;
+      }
+
+      #toolbar button {
+        padding: 6px 10px;
+        font-size: .9rem;
+      }
+
+      #optionsContainer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h2>Fake-X</h2>
+
+  <select id="userSelect">
+    <option value="cida">Cida Pedrosa</option>
+    <option value="enl">Esquerda na Luta</option>
+  </select>
+
+  <div id="toolbar">
+    <button data-cmd="bold"><strong>B</strong></button>
+    <button data-cmd="underline"><u>U</u></button>
+    <button id="nightModeBtn">Modo Noturno</button>
+  </div>
+
+  <div id="tweetContainer">
+    <div id="tweetHeader">
+      <img id="profileImg" src="" alt="Foto de perfil">
+      <div>
+        <h1 id="profileName"></h1>
+        <p id="profileHandle"></p>
+      </div>
+    </div>
+    <div id="tweetText" contenteditable placeholder="Escreva seu texto aqui..."></div>
+  </div>
+
+  <div id="charCount">340 caracteres restantes</div>
+
+  <div id="optionsContainer">
+    <label for="fontSizeSelect">Tamanho da fonte:</label>
+    <select id="fontSizeSelect">
+      <option value="16px">Mt. Pequeno</option>
+      <option value="18px">Pequeno</option>
+      <option value="20px" selected>Normal</option>
+      <option value="22px">Grande</option>
+      <option value="24px">Mt. Grande</option>
+    </select>
+  </div>
+
+  <button id="downloadBtn">Download PNG</button>
+
+  <script>
+    const tweetContainer = document.querySelector('#tweetContainer');
+    const tweetText = document.querySelector('#tweetText');
+    const charCount = document.querySelector('#charCount');
+    const downloadBtn = document.querySelector('#downloadBtn');
+    const fontSizeSelect = document.querySelector('#fontSizeSelect');
+    const nightModeBtn = document.querySelector('#nightModeBtn');
+    const toolbarBtns = document.querySelectorAll('#toolbar [data-cmd]');
+    const profileImg = document.querySelector('#profileImg');
+    const profileName = document.querySelector('#profileName');
+    const profileHandle = document.querySelector('#profileHandle');
+    const userSelect = document.querySelector('#userSelect');
+    const maxChars = 340;
+
+    const profiles = {
+      cida: {
+        name: 'Cida Pedrosa🌻',
+        handle: '@cidapedrosa65',
+        img: 'foto_perfil.jpg'
+      },
+      enl: {
+        name: 'Esquerda na Luta',
+        handle: '@esquerdanaluta',
+        img: 'imgNaLuta.png'
+      }
+    };
+
+    const loadProfile = (key) => {
+      profileImg.src = profiles[key].img;
+      profileName.textContent = profiles[key].name;
+      profileHandle.textContent = profiles[key].handle;
+    };
+
+    const adjustHeight = () => {
+      tweetContainer.style.height = 'auto';
+      tweetContainer.style.height = tweetContainer.scrollHeight + 'px';
+    };
+
+    const update = () => {
+      let text = tweetText.textContent;
+      if (text.length > maxChars) {
+        text = text.slice(0, maxChars);
+        tweetText.textContent = text;
+        placeCaretAtEnd(tweetText);
+      }
+      charCount.textContent = `${maxChars - text.length} caracteres restantes`;
+      adjustHeight();
+      downloadBtn.style.display = text.trim() ? 'inline-block' : 'none';
+    };
+
+    toolbarBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.execCommand(btn.dataset.cmd);
+        update();
+      });
+    });
+
+    nightModeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('night-mode');
+      nightModeBtn.textContent = document.body.classList.contains('night-mode') ? 'Modo Claro' : 'Modo Noturno';
+      update();
+    });
+
+    fontSizeSelect.addEventListener('change', () => {
+      tweetText.style.fontSize = fontSizeSelect.value;
+      adjustHeight();
+    });
+
+    tweetText.addEventListener('input', update);
+
+    downloadBtn.addEventListener('click', () => {
+      adjustHeight();
+      html2canvas(tweetContainer, { scale: 3, backgroundColor: null })
+        .then(canvas => {
+          const link = document.createElement('a');
+          link.download = 'conteudo_instagram.png';
+          link.href = canvas.toDataURL();
+          link.click();
+        });
+    });
+
+    function placeCaretAtEnd(el) {
+      el.focus();
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      range.collapse(false);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+
+    userSelect.addEventListener('change', () => {
+      loadProfile(userSelect.value);
+    });
+
+    loadProfile(userSelect.value);
+    tweetText.style.fontSize = fontSizeSelect.value;
+    update();
+  </script>
+</body>
+</html>
