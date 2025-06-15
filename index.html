@@ -212,6 +212,7 @@
   <select id="userSelect">
     <option value="cida">Cida Pedrosa</option>
     <option value="enl">Esquerda na Luta</option>
+    <option value="omao">O Mundo Aqui</option>
   </select>
 
   <div id="toolbar">
@@ -270,21 +271,27 @@
         name: 'Esquerda na Luta',
         handle: '@esquerdanaluta',
         img: 'imgNaLuta.png'
+      },
+      omao: {
+        name: 'O Mundo Aqui Oficial',
+        handle: '@omundoaquioficial',
+        img: 'omundoaqui.png'
       }
     };
 
-    const loadProfile = (key) => {
-      profileImg.src = profiles[key].img;
-      profileName.textContent = profiles[key].name;
-      profileHandle.textContent = profiles[key].handle;
-    };
+    function loadProfile(key) {
+      const profile = profiles[key];
+      profileImg.src = profile.img;
+      profileName.textContent = profile.name;
+      profileHandle.textContent = profile.handle;
+    }
 
-    const adjustHeight = () => {
+    function adjustHeight() {
       tweetContainer.style.height = 'auto';
       tweetContainer.style.height = tweetContainer.scrollHeight + 'px';
-    };
+    }
 
-    const update = () => {
+    function update() {
       let text = tweetText.textContent;
       if (text.length > maxChars) {
         text = text.slice(0, maxChars);
@@ -294,7 +301,7 @@
       charCount.textContent = `${maxChars - text.length} caracteres restantes`;
       adjustHeight();
       downloadBtn.style.display = text.trim() ? 'inline-block' : 'none';
-    };
+    }
 
     toolbarBtns.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -318,13 +325,12 @@
 
     downloadBtn.addEventListener('click', () => {
       adjustHeight();
-      html2canvas(tweetContainer, { scale: 3, backgroundColor: null })
-        .then(canvas => {
-          const link = document.createElement('a');
-          link.download = 'conteudo_instagram.png';
-          link.href = canvas.toDataURL();
-          link.click();
-        });
+      html2canvas(tweetContainer, { scale: 3, backgroundColor: null }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'conteudo_instagram.png';
+        link.href = canvas.toDataURL();
+        link.click();
+      });
     });
 
     function placeCaretAtEnd(el) {
@@ -337,9 +343,7 @@
       sel.addRange(range);
     }
 
-    userSelect.addEventListener('change', () => {
-      loadProfile(userSelect.value);
-    });
+    userSelect.addEventListener('change', () => loadProfile(userSelect.value));
 
     loadProfile(userSelect.value);
     tweetText.style.fontSize = fontSizeSelect.value;
